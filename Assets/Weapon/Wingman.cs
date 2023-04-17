@@ -11,10 +11,10 @@ public class Wingman : MonoBehaviour
     public int maxAmmo = 6;
     private int currentAmmo;
     public float reloadTime = 2.1f;
+
     private bool isReloading = false;
 
     public Camera fpsCam;
-    public ParticleSystem muzzleFlash;
     public TextMeshProUGUI currentAmmoText;
     public TextMeshProUGUI maxAmmoText;
 
@@ -81,7 +81,6 @@ public class Wingman : MonoBehaviour
 
     private void Shoot()
     {
-        muzzleFlash.Play();
         RaycastHit hit;
 
         currentAmmo--;

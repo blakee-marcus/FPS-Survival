@@ -2,19 +2,18 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-    
     public int maxHealth;
     public int attackDamage = 10;
     public float attackRange = 3f;
     public float moveSpeed = 1.85f;
-    public float attackSpeed = 1.25f; // Attack speed in seconds
-    public float powerupDropChance = 0.02f; // Chance of dropping a powerup (0.5 = 50%)
-    public GameObject nukePowerUpPrefab; // Reference to the nuke power-up prefab
+    public float attackSpeed = 1.25f;
+    public float powerupDropChance = 2f;
+    
+    public GameObject[] powerUpPrefabs;
 
     private float currentHealth;
     private GameObject player;
-    private float attackTimer = 0f; // Timer between attacks
-
+    private float attackTimer = 0f;
 
     void Start()
     {
@@ -51,14 +50,22 @@ public class Enemy : MonoBehaviour
     public void TakeDamage(float damage)
     {
         currentHealth -= damage;
-        Debug.Log("Enemy took " + damage + " damage. Current health: " + currentHealth);
         if (currentHealth <= 0)
         {
-            if (Random.value < powerupDropChance)
-            {
-                Instantiate(nukePowerUpPrefab, transform.position, Quaternion.identity);
-            }
+            DropHandler();
             Die();
+        }
+    }
+
+    void DropHandler()
+    {
+        float randomValue;
+        randomValue = Random.Range(0f, 100f);
+        Debug.Log(randomValue);
+        if (randomValue <= powerupDropChance)
+        {
+            int randomPowerUp = Random.Range(0, powerUpPrefabs.Length);
+            Instantiate(powerUpPrefabs[randomPowerUp], transform.position, Quaternion.identity);
         }
     }
 

@@ -119,7 +119,9 @@ MonoBehaviour:
   moveSpeed: 3.5
   attackSpeed: 1.5
   powerupDropChance: 0.5
-  nukePowerUpPrefab: {fileID: 7542110326596538329, guid: 43073a3b48b11ff4ea1913542394ce2d, type: 3}
+  powerUpPrefabs:
+  - {fileID: 7542110326596538329, guid: 43073a3b48b11ff4ea1913542394ce2d, type: 3}
+  - {fileID: 8837751422272793777, guid: 55d0909da8a548b4fba00a81df5a544e, type: 3}
 --- !u!195 &3524125539325399846
 NavMeshAgent:
   m_ObjectHideFlags: 0

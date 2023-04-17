@@ -7,7 +7,7 @@ public class PlayerMovement : MonoBehaviour
     // References
     [Header("References")]
     public CharacterController controller;
-    public Animator anim;
+    public ParticleSystem dust;
 
 
     // Movement speed
@@ -50,36 +50,32 @@ public class PlayerMovement : MonoBehaviour
     // Sliding
     [Header("Sliding")]
     bool isSliding;
-    float slideSpeed = 15f;
-    public float slideDuration = 1.5f;
-    float slideHeight = 0.6f;
-    Vector3 slidingCenter = new Vector3(0, 0.3f, 0);
-
-
-    // Climbing
-    [Header("Climbing")]
-    bool isClimbing;
-    public float climbSpeed = 5f;
-    public float detectionLength;
-    public float sphereCastRadius;
-    public float wallLookAngle;
-    private float maxWallLookAngle;
-    public float climbTimer;
-    public float maxClimbTime;
-
-    private RaycastHit frontWallHit;
-    private bool wallFront;
-    public LayerMask wallMask;
+    float slideSpeedIncrease = 2.5f;
+    float slideSpeedDecrease;
+    float slideDuration = 1.5f;
+    public float maxSlideDuration = 1.5f;
 
     // Extra jump charges
     [Header("Extra Jump Charges")]
-    public float totalExtraJumpCharges;
+    public float maxExtraJumpCharges;
     float extraJumpCharges;
+
+    void IncreaseSpeed(float speedIncrease)
+    {
+        Debug.Log("Increasing speed by " + speedIncrease);
+        speed += speedIncrease * Time.deltaTime;
+    }
+
+    void DecreaseSpeed(float speedDecrease)
+    {
+        Debug.Log("Decreasing speed by " + speedDecrease);
+        speed -= speedDecrease * Time.deltaTime;
+    }
 
     private void Start()
     {
         startHeight = transform.localScale.y;
-        anim = GetComponentInChildren<Animator>();
+        slideSpeedDecrease = slideSpeedIncrease * 1.2f;
     }
 
     private void Update()
@@ -96,8 +92,14 @@ public class PlayerMovement : MonoBehaviour
         controller.Move(velocity * Time.deltaTime);
 
         HandleInput();
-        CheckClimbing();
-        ClimbingStateMachine();
+        if (isGrounded && !isSliding)
+        {
+            SpeedHandler();
+        }
+        if (isSliding)
+        {
+            HandleSlide();
+        }
     }
     private void HandleInput()
     {
@@ -122,28 +124,14 @@ public class PlayerMovement : MonoBehaviour
             ExitCrouch();
         }
         // Sprint
-        if (Input.GetKeyDown(KeyCode.LeftShift) && isGrounded && !isCrouching)
+        if (Input.GetKeyDown(KeyCode.LeftShift) && isGrounded)
         {
             isSprinting = true;
-            Sprint();
         }
-        if (Input.GetKeyUp(KeyCode.LeftShift) && isSprinting)
+        if (Input.GetKeyUp(KeyCode.LeftShift))
         {
             isSprinting = false;
-            Idle();
-        }
 
-        // Automatically trigger slide if player is crouching while sprinting
-        if (isGrounded && isSprinting && isCrouching)
-        {
-            Slide();
-        }
-        
-        if (isClimbing) ClimbingMovement();
-
-        if (!isSliding)
-        {
-            SpeedHandler();
         }
     }
 
@@ -171,32 +159,28 @@ public class PlayerMovement : MonoBehaviour
         // Reset extra jumps to starting value
         if (isGrounded)
         {
-            extraJumpCharges = totalExtraJumpCharges;
-        }
-
-        // Automatically trigger slide if player is crouching while sprinting
-        if (isGrounded && isCrouching)
-        {
-            Slide();
+            extraJumpCharges = maxExtraJumpCharges;
         }
     }
 
 
     void Crouch()
-{
-    if (isGrounded)
     {
-        // controller.height = crouchHeight;
-        // smoothly transition to crouch height over 1 second
         controller.height = Mathf.Lerp(controller.height, crouchHeight, 1.5f * Time.deltaTime);
-        // controller.center = crouchingCenter;
-        // smoothly transition to crouching center over 1 second
         controller.center = Vector3.Lerp(controller.center, crouchingCenter, 1.5f * Time.deltaTime);
         transform.localScale = new Vector3(transform.localScale.x, crouchHeight, transform.localScale.z);
+        if (speed > runSpeed)
+        {
+            isSprinting = false;
+            isSliding = true;
+            if (isGrounded)
+            {
+                IncreaseSpeed(slideSpeedIncrease);
+            }
+            slideDuration = maxSlideDuration;
+        }
+        isCrouching = true;
     }
-
-    isCrouching = true;
-}
 
     void ExitCrouch()
     {
@@ -205,95 +189,25 @@ public class PlayerMovement : MonoBehaviour
         transform.localScale = new Vector3(transform.localScale.x, startHeight, transform.localScale.z);
         isCrouching = false;
         isSliding = false;
-        slideDuration = 1.5f;
-        slideSpeed = 15f;
     }
 
-    void Slide()
+    void HandleSlide()
     {
-        isSliding = true;
-        speed = slideSpeed;
-        // have slide speed decrease to crouch speed within the duration of the slide
-        slideSpeed = Mathf.Lerp(slideSpeed, crouchSpeed, slideDuration * Time.deltaTime);
-        controller.height = slideHeight;
-        controller.center = slidingCenter;
-        transform.localScale = new Vector3(transform.localScale.x, slideHeight, transform.localScale.z);
-        // after duration of slide, reset to crouch
+        DecreaseSpeed(slideSpeedDecrease);
+        slideDuration -= 1f * Time.deltaTime;
         if (slideDuration <= 0)
         {
             isSliding = false;
-            Crouch();
-            slideDuration = 1.5f;
-        }
-        else
-        {
-            slideDuration -= Time.deltaTime;
         }
     }
 
-    void CheckClimbing()
-    {
-        wallFront = Physics.SphereCast(transform.position, sphereCastRadius, transform.forward, out frontWallHit, detectionLength, wallMask);
-        wallLookAngle = Vector3.Angle(transform.forward, -frontWallHit.normal);
-        if (isGrounded)
-        {
-            climbTimer = maxClimbTime;
-        }
-    }
-    void StartClimbing()
-    {
-        isClimbing = true;
-    }
-
-    void ClimbingMovement()
-    {
-        velocity = new Vector3(velocity.x, climbSpeed, velocity.z);
-    }
-
-    void StopClimbing()
-    {
-        isClimbing = false;
-    }
-
-    void ClimbingStateMachine()
-    {
-        if(wallFront && Input.GetKey(KeyCode.W) && wallLookAngle < maxWallLookAngle)
-        {
-            if (!isClimbing && climbTimer > 0) StartClimbing();
-            if (climbTimer > 0) climbTimer -= Time.deltaTime;
-            if (climbTimer < 0) StopClimbing();
-            
-        }
-        else
-        {
-            if(isClimbing) StopClimbing();
-        }
-    }
     void SpeedHandler()
     {
-        speed = isSprinting ? sprintSpeed : isCrouching ? crouchSpeed : runSpeed;
-        // Set Animation States
-        if (move != Vector3.zero && !isSprinting)
-        {
-            Walk();
-        }
-        if (move == Vector3.zero)
-        {
-            Idle();
-        }
+        speed = isCrouching ? crouchSpeed : isSprinting ? sprintSpeed : runSpeed;
     }
 
-    // Animation Settings
-    private void Idle()
+    void CreateDust()
     {
-        anim.SetFloat("Speed", 0f, 0.1f, Time.deltaTime);
-    }
-    private void Walk()
-    {
-        anim.SetFloat("Speed", 0.5f, 0.1f, Time.deltaTime);
-    }
-    private void Sprint()
-    {
-        anim.SetFloat("Speed", 1f, 0.1f, Time.deltaTime);
+        dust.Play();
     }
 }

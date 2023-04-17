@@ -6,6 +6,7 @@ public class PowerUpDamageUp : MonoBehaviour
 {
     [SerializeField] private GameObject pickupEffect;
     public float duration = 30f;
+    private GameObject instantiatedEffect;
 
     void OnTriggerEnter(Collider other)
     {
@@ -18,19 +19,18 @@ public class PowerUpDamageUp : MonoBehaviour
 
     IEnumerator Pickup(Collider player)
     {
-        Instantiate(pickupEffect, transform.position, transform.rotation);
+        instantiatedEffect = Instantiate(pickupEffect, transform.position, transform.rotation);
 
         GetComponent<MeshRenderer>().enabled = false;
         GetComponent<Collider>().enabled = false;
 
-        Debug.Log(player);
-        
-        // player.GetComponent<Wingman>().damage *= 10;
+        player.gameObject.transform.Find("Camera/WeaponHolder").GetChild(0).GetComponent<Wingman>().damage *= 10;
 
         yield return new WaitForSeconds(duration);
 
-        // player.GetComponent<Wingman>().damage /= 10;
-
+        player.gameObject.transform.Find("Camera/WeaponHolder").GetChild(0).GetComponent<Wingman>().damage /= 10;
+        
+        Destroy(instantiatedEffect);
         Destroy(gameObject);
     }
 }

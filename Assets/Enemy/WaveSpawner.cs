@@ -154,19 +154,21 @@ public class WaveSpawner : MonoBehaviour
         {
             enemy.maxHealth = 100;
             enemy.attackDamage = 10;
-            enemy.moveSpeed = 1.85f;
+            enemy.moveSpeed = Random.Range(1.45f, 2.25f);
         }
         else if (waveNum >= 2 && waveNum <= 10)
         {
             enemy.maxHealth = 100 + ((waveNum - 1) * 100);
             enemy.attackDamage = 10 + ((waveNum - 1) * 10);
-            enemy.moveSpeed = 1.85f + (0.23f * (waveNum - 1));
+            float standardSpeed = 1.85f + (0.23f * (waveNum - 1));
+            enemy.moveSpeed = Random.Range(standardSpeed - 0.4f, standardSpeed + 0.4f);
         }
         else if (waveNum >= 11)
         {
             enemy.maxHealth = Mathf.RoundToInt(enemy.maxHealth * 1.1f);
             enemy.attackDamage = Mathf.RoundToInt(enemy.attackDamage * 1.1f);
-            enemy.moveSpeed = 3.14f;
+            float standardSpeed = 3.14f;
+            enemy.moveSpeed = Random.Range(standardSpeed - 0.4f, standardSpeed + 0.4f);
         }
     }
 }
