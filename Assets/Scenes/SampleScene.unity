@@ -5592,50 +5592,6 @@ NavMeshObstacle:
   m_CarveOnlyStationary: 1
   m_Center: {x: 0, y: 0, z: 0}
   m_TimeToStationary: 0.5
---- !u!1 &542883470
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 542883471}
-  - component: {fileID: 542883472}
-  m_Layer: 0
-  m_Name: Revolver
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &542883471
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 542883470}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.225, z: -0.025}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 937814834}
-  m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &542883472
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 542883470}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c41473405ab69564d8eb7e18ef2c5297, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &553798637 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7250900495603525910, guid: cfcf142c4733a7e4aa6abcf18793de1a, type: 3}
@@ -11198,7 +11154,6 @@ Transform:
   m_Children:
   - {fileID: 778076731}
   - {fileID: 1761450272}
-  - {fileID: 542883471}
   m_Father: {fileID: 1354341849}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -11561,7 +11516,7 @@ MonoBehaviour:
   - {fileID: 929325711}
   - {fileID: 553798637}
   - {fileID: 808836550}
-  timeBetweenWaves: 1
+  timeBetweenWaves: 20
   wavesCompleted: 0
   currentWaveText: {fileID: 1788786184}
   waveStateText: {fileID: 985447186}
@@ -12583,6 +12538,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1761450272}
+  - component: {fileID: 1761450273}
   m_Layer: 0
   m_Name: Unarmed
   m_TagString: Untagged
@@ -12605,6 +12561,25 @@ Transform:
   m_Father: {fileID: 937814834}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1761450273
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1761450271}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9780bfedd14f41141a54acb82d1d5a5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  damage: 30
+  fireRate: 2.6
+  range: 2.1
+  maxAmmo: 0
+  fpsCam: {fileID: 1354341852}
+  currentAmmoText: {fileID: 1486695871}
+  maxAmmoText: {fileID: 605875726}
 --- !u!1 &1788786182
 GameObject:
   m_ObjectHideFlags: 0
