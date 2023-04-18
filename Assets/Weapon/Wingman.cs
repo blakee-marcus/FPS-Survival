@@ -101,7 +101,6 @@ public class Wingman : MonoBehaviour
             
             if (enemy != null)
             {
-                Debug.Log(hit.collider.CompareTag("Head"));
                 if (hit.collider.CompareTag("Head"))
                 {
                     int headshotDamage = Mathf.RoundToInt(damage * headshotMultiplier);

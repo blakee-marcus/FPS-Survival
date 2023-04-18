@@ -61,7 +61,6 @@ public class Enemy : MonoBehaviour
     {
         float randomValue;
         randomValue = Random.Range(0f, 100f);
-        Debug.Log(randomValue);
         if (randomValue <= powerupDropChance)
         {
             int randomPowerUp = Random.Range(0, powerUpPrefabs.Length);
