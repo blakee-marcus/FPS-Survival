@@ -62,13 +62,11 @@ public class PlayerMovement : MonoBehaviour
 
     void IncreaseSpeed(float speedIncrease)
     {
-        Debug.Log("Increasing speed by " + speedIncrease);
         speed += speedIncrease * Time.deltaTime;
     }
 
     void DecreaseSpeed(float speedDecrease)
     {
-        Debug.Log("Decreasing speed by " + speedDecrease);
         speed -= speedDecrease * Time.deltaTime;
     }
 
@@ -126,12 +124,7 @@ public class PlayerMovement : MonoBehaviour
         // Sprint
         if (Input.GetKeyDown(KeyCode.LeftShift) && isGrounded)
         {
-            isSprinting = true;
-        }
-        if (Input.GetKeyUp(KeyCode.LeftShift))
-        {
-            isSprinting = false;
-
+            isSprinting = !isSprinting;
         }
     }
 

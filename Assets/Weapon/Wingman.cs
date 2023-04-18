@@ -12,11 +12,16 @@ public class Wingman : MonoBehaviour
     private int currentAmmo;
     public float reloadTime = 2.1f;
 
+    public float headshotMultiplier = 2.15f;
+    public float limbMultiplier = 0.9f;
+
     private bool isReloading = false;
 
     public Camera fpsCam;
     public TextMeshProUGUI currentAmmoText;
     public TextMeshProUGUI maxAmmoText;
+
+    [SerializeField] ParticleSystem muzzleFlash;
 
     private void Start()
     {
@@ -81,6 +86,7 @@ public class Wingman : MonoBehaviour
 
     private void Shoot()
     {
+        muzzleFlash.Play();
         RaycastHit hit;
 
         currentAmmo--;
@@ -88,14 +94,31 @@ public class Wingman : MonoBehaviour
         if (Physics.Raycast(fpsCam.transform.position, fpsCam.transform.forward, out hit))
         {
             Enemy enemy = hit.transform.GetComponent<Enemy>();
+            if (enemy == null) 
+            { 
+                enemy = hit.transform.GetComponentInParent<Enemy>();
+            }
+            
             if (enemy != null)
             {
-                enemy.TakeDamage(damage);
-            }
-
-            if (hit.collider.CompareTag("Enemy"))
-            {
-                DamagePopup.Create(hit.point, damage, false);
+                Debug.Log(hit.collider.CompareTag("Head"));
+                if (hit.collider.CompareTag("Head"))
+                {
+                    int headshotDamage = Mathf.RoundToInt(damage * headshotMultiplier);
+                    DamagePopup.Create(hit.point, headshotDamage, true);
+                    enemy.TakeDamage(headshotDamage);
+                }
+                else if (hit.collider.CompareTag("Limb"))
+                {
+                    int limbDamage = Mathf.RoundToInt(damage * limbMultiplier);
+                    DamagePopup.Create(hit.point, limbDamage, false);
+                    enemy.TakeDamage(limbDamage);
+                }
+                else
+                {
+                    DamagePopup.Create(hit.point, damage, false);
+                    enemy.TakeDamage(damage);
+                }
             }
         }
     }
