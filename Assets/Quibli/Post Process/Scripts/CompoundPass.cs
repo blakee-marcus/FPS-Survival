@@ -168,7 +168,7 @@ public class CompoundPass : ScriptableRenderPass {
         for (int index = 0; index < m_PostProcessRenderers.Count; index++) {
             var ppRenderer = m_PostProcessRenderers[index];
             // Skips current renderer if "visibleInSceneView" = false and the current camera is a scene view camera.
-            if (isSceneView && !ppRenderer.visibleInSceneView) continue;
+            if ((isSceneView && !ppRenderer.visibleInSceneView) || renderingData.cameraData.isPreviewCamera) continue;
             // Setup the camera for the renderer and if it will render anything, add to active renderers and get
             // its required inputs.
             if (ppRenderer.Setup(in renderingData, _injectionPoint)) {

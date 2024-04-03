@@ -39,8 +39,6 @@ public class ColorGradingRenderer : CompoundRenderer {
         internal static readonly int Saturation = Shader.PropertyToID("_Saturation");
     }
 
-    public override bool visibleInSceneView => false;
-
     public override ScriptableRenderPassInput input =>
         ScriptableRenderPassInput.Color | ScriptableRenderPassInput.Depth;
 

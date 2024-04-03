@@ -16,7 +16,7 @@ inline half NdotLTransitionPrimary(half3 normal, half3 lightDir) {
     return NdotLTransition(normal, lightDir, _SelfShadingSize);
 }
 
-half3 LightingPhysicallyBased_DSTRM(Light light, half3 normalWS, half3 viewDirectionWS, half3 positionWS) {
+half3 LightingPhysicallyBased_DSTRM(Light light, half3 normalWS, half3 viewDirectionWS, float3 positionWS) {
     // If all light in the scene is baked, we use custom light direction for the cel shading.
     light.direction = lerp(light.direction, _LightmapDirection, _OverrideLightmapDir);
 
@@ -59,7 +59,7 @@ half3 LightingPhysicallyBased_DSTRM(Light light, half3 normalWS, half3 viewDirec
     light.distanceAttenuation *= occludedAttenuation;
 #endif
 
-    half shadowAttenuation = light.shadowAttenuation * light.distanceAttenuation;
+    float shadowAttenuation = light.shadowAttenuation * light.distanceAttenuation;
 #if defined(DR_LIGHT_ATTENUATION)
     shadowAttenuation = RangeRemap(_LightAttenuation.x, _LightAttenuation.y, shadowAttenuation);
     const half3 unityShaded = c.rgb * shadowAttenuation;
@@ -82,7 +82,7 @@ void StylizeLight(inout Light light) {
     const half shadowAttenuation = saturate(light.shadowAttenuation * 10.0);
     light.shadowAttenuation = shadowAttenuation;
 
-    const half distanceAttenuation = smoothstep(0, 0.001, light.distanceAttenuation);
+    const float distanceAttenuation = smoothstep(0, 0.001, light.distanceAttenuation);
     light.distanceAttenuation = distanceAttenuation;
 #endif
 
@@ -124,7 +124,7 @@ half4 UniversalFragment_DSTRM(InputData inputData, half3 albedo, half3 emission,
 #endif
 
     BRDFData brdfData;
-    InitializeBRDFData(albedo, 1.0 - 1.0 / kDieletricSpec.a, 0, 0, alpha, brdfData);
+    InitializeBRDFData(albedo, 1.0 - 1.0 / kDielectricSpec.a, 0, 0, alpha, brdfData);
     half3 color = GlobalIllumination(brdfData, inputData.bakedGI, 1.0, inputData.normalWS, inputData.viewDirectionWS);
     color += LightingPhysicallyBased_DSTRM(mainLight, inputData.normalWS, inputData.viewDirectionWS,
                                            inputData.positionWS);

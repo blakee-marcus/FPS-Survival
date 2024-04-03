@@ -2,75 +2,99 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-    public int maxHealth;
-    public int attackDamage = 10;
-    public float attackRange = 3f;
-    public float moveSpeed = 1.85f;
-    public float attackSpeed = 1.25f;
-    public float powerupDropChance = 2f;
-    
-    public GameObject[] powerUpPrefabs;
+  // Ground check
+  [Header("Ground Check")]
+  public Transform groundCheck;
+  public LayerMask groundMask;
+  Vector3 velocity;
+  public float groundDistance = 0.4f;
+  public float gravity = -19.62f;
+  bool isGrounded;
 
-    private float currentHealth;
-    private GameObject player;
-    private float attackTimer = 0f;
+  public int maxHealth;
+  public int attackDamage = 10;
+  public float attackRange = 3f;
+  public float moveSpeed = 1.85f;
+  public float attackSpeed = 1.25f;
+  public float powerupDropChance = 2f;
 
-    void Start()
+  public GameObject[] powerUpPrefabs;
+
+  private float currentHealth;
+  private GameObject player;
+  private float attackTimer = 0f;
+
+  void Start()
+  {
+    currentHealth = maxHealth;
+    player = GameObject.FindGameObjectWithTag("Player");
+  }
+
+  void Update()
+  {
+    HandleGravity();
+    if (player != null)
     {
-        currentHealth = maxHealth;
-        player = GameObject.FindGameObjectWithTag("Player");
+      float distanceToPlayer = Vector3.Distance(transform.position, player.transform.position);
+
+      if (distanceToPlayer <= attackRange && attackTimer <= 0f)
+      {
+        // Attack the player
+        player.GetComponent<PlayerHealth>().TakeDamage(attackDamage);
+        attackTimer = attackSpeed;
+      }
+      else if (distanceToPlayer > attackRange)
+      {
+        // Move towards the player
+        transform.LookAt(player.transform.position);
+        transform.position += transform.forward * moveSpeed * Time.deltaTime;
+      }
     }
 
-    void Update()
+    if (attackTimer > 0f)
     {
-        if (player != null)
-        {
-            float distanceToPlayer = Vector3.Distance(transform.position, player.transform.position);
-
-            if (distanceToPlayer <= attackRange && attackTimer <= 0f)
-            {
-                // Attack the player
-                player.GetComponent<PlayerHealth>().TakeDamage(attackDamage);
-                attackTimer = attackSpeed;
-            }
-            else if (distanceToPlayer > attackRange)
-            {
-                // Move towards the player
-                transform.LookAt(player.transform.position);
-                transform.position += transform.forward * moveSpeed * Time.deltaTime;
-            }
-        }
-
-        if (attackTimer > 0f)
-        {
-            attackTimer -= Time.deltaTime;
-        }
+      attackTimer -= Time.deltaTime;
     }
+  }
 
-    public void TakeDamage(float damage)
+  void HandleGravity()
+  {
+    // Set Grounded State
+    isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+    // Reset Velocity
+    if (isGrounded && velocity.y < 0)
     {
-        currentHealth -= damage;
-        if (currentHealth <= 0)
-        {
-            DropHandler();
-            Die();
-        }
+      velocity.y = -5f;
     }
+    // Apply gravity
+    velocity.y += gravity * Time.deltaTime;
+    transform.position += velocity * Time.deltaTime;
+  }
 
-    void DropHandler()
+  public void TakeDamage(float damage)
+  {
+    currentHealth -= damage;
+    if (currentHealth <= 0)
     {
-        float randomValue;
-        randomValue = Random.Range(0f, 100f);
-        if (randomValue <= powerupDropChance)
-        {
-            int randomPowerUp = Random.Range(0, powerUpPrefabs.Length);
-            Instantiate(powerUpPrefabs[randomPowerUp], transform.position, Quaternion.identity);
-        }
+      DropHandler();
+      Die();
     }
+  }
 
-    public void Die()
+  void DropHandler()
+  {
+    float randomValue;
+    randomValue = Random.Range(0f, 100f);
+    if (randomValue <= powerupDropChance)
     {
-        // Play death animation, disable enemy GameObject, etc.
-        Destroy(gameObject);
+      int randomPowerUp = Random.Range(0, powerUpPrefabs.Length);
+      Instantiate(powerUpPrefabs[randomPowerUp], transform.position, Quaternion.identity);
     }
+  }
+
+  public void Die()
+  {
+    // Play death animation, disable enemy GameObject, etc.
+    Destroy(gameObject);
+  }
 }

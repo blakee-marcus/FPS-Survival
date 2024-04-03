@@ -322,14 +322,15 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3524125539325399868}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 22.963459, y: 2.6184769, z: 3.563303}
+  m_LocalRotation: {x: -0.10673304, y: -0.743432, z: -0.12229807, w: 0.64881444}
+  m_LocalPosition: {x: -0.15330221, y: -0.22373696, z: -0.02093363}
   m_LocalScale: {x: 2, y: 1.8, z: 2}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 15192139}
   - {fileID: 1468945544}
   - {fileID: 1681716751}
+  - {fileID: 6388054941610570523}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -409,6 +410,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a49d780357778ec428f57f530b1aaf8e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  groundCheck: {fileID: 6388054941610570523}
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 8
+  groundDistance: 0.4
+  gravity: -19.62
   maxHealth: 100
   attackDamage: 10
   attackRange: 3
@@ -452,3 +459,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c79666fe7e0a366488d78ec417d76a41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &4246053740118822703
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6388054941610570523}
+  m_Layer: 0
+  m_Name: GroundCheck
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6388054941610570523
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4246053740118822703}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -1.007, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3524125539325399869}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

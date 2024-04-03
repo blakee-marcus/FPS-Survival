@@ -15,17 +15,16 @@ namespace Quibli {
 
 [ExecuteAlways]
 public class Readme : ScriptableObject {
-    [NonSerialized] public readonly string AssetVersion = "1.7.1";
-
-    [NonSerialized] public bool? UrpInstalled;
-
-    [NonSerialized] [CanBeNull] public string PackageManagerError;
-
-    [NonSerialized] public string UrpVersionInstalled = "N/A";
-
-    [NonSerialized] public string UnityVersion = Application.unityVersion;
+    [NonSerialized]public readonly string AssetVersion = "1.8.2";
+    [NonSerialized]public bool? UrpInstalled;
+    [NonSerialized] [CanBeNull]public string PackageManagerError;
+    [NonSerialized]public string UrpVersionInstalled = "N/A";
+    [NonSerialized]public string UnityVersion = Application.unityVersion;
 
     private const string UrpPackageID = "com.unity.render-pipelines.universal";
+
+    // bd41cdc8-9f79-4d72-82b6-95d4f615811a
+    // 95b02117-de66-49f0-91e7-cc5f4291cf90
 
     public void Refresh() {
         UrpInstalled = false;

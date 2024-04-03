@@ -4,28 +4,28 @@ using UnityEngine;
 
 public class LookScript : MonoBehaviour
 {
-    public float mouseSensitivity = 100f;
-    public Transform playerBody;
+  public float mouseSensitivity = 100f;
+  public Transform playerBody;
 
-    float xRotation = 0f;
-    // Start is called before the first frame update
-    void Start()
-    {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-    }
+  float xRotation = 0f;
+  // Start is called before the first frame update
+  void Start()
+  {
+    Cursor.lockState = CursorLockMode.Locked;
+    Cursor.visible = false;
+  }
 
-    // Update is called once per frame
-    void Update()
-    {
-        // get input
-        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
-        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
+  // Update is called once per frame
+  void Update()
+  {
+    // get input
+    float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
+    float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
 
-        xRotation -= mouseY;
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
-        // rotate cam and orientation
-        transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-        playerBody.Rotate(Vector3.up * mouseX);
-    }
+    xRotation -= mouseY;
+    xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+    // rotate cam and orientation
+    transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+    playerBody.Rotate(Vector3.up * mouseX);
+  }
 }

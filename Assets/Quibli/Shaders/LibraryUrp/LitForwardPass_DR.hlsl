@@ -2,6 +2,14 @@
 #define LIT_FORWARD_PASS_DR
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Version.hlsl"
+
+// Check is needed because in Unity 2021 they use two different URP versions - 14 on desktop and 12 on mobile.
+#if !VERSION_LOWER(13, 0)
+#if defined(LOD_FADE_CROSSFADE)
+    #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/LODCrossFade.hlsl"
+#endif
+#endif
 #include "Lighting_DR.hlsl"
 
 struct Attributes
@@ -10,7 +18,8 @@ struct Attributes
     float3 normalOS     : NORMAL;
     float4 tangentOS    : TANGENT;
     float2 texcoord     : TEXCOORD0;
-    float2 lightmapUV   : TEXCOORD1;
+    float2 staticLightmapUV    : TEXCOORD1;
+    float2 dynamicLightmapUV    : TEXCOORD2;
 
 #if defined(DR_VERTEX_COLORS_ON)
     float4 color        : COLOR;
@@ -22,26 +31,31 @@ struct Attributes
 struct Varyings
 {
     float2 uv                       : TEXCOORD0;
-    DECLARE_LIGHTMAP_OR_SH(lightmapUV, vertexSH, 1);
 
     #if defined(REQUIRES_WORLD_SPACE_POS_INTERPOLATOR)
-    float3 positionWS               : TEXCOORD2;
+    float3 positionWS               : TEXCOORD1;
     #endif
 
-    float3 normalWS                 : TEXCOORD3;
+    float3 normalWS                 : TEXCOORD2;
     #if defined(REQUIRES_WORLD_SPACE_TANGENT_INTERPOLATOR)
-    float4 tangentWS                : TEXCOORD4;    // xyz: tangent, w: sign
+    float4 tangentWS                : TEXCOORD3;    // xyz: tangent, w: sign
     #endif
-    float3 viewDirWS                : TEXCOORD5;
+    float3 viewDirWS                : TEXCOORD4;
 
-    half4 fogFactorAndVertexLight   : TEXCOORD6; // x: fogFactor, yzw: vertex light
+    #ifdef _ADDITIONAL_LIGHTS_VERTEX
+    half4 fogFactorAndVertexLight  : TEXCOORD5; // x: fogFactor, yzw: vertex light
+    #else
+    half  fogFactor                 : TEXCOORD5;
+    #endif
 
     #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
-    float4 shadowCoord              : TEXCOORD7;
+    float4 shadowCoord              : TEXCOORD6;
     #endif
 
-    #if defined(REQUIRES_TANGENT_SPACE_VIEW_DIR_INTERPOLATOR)
-    float3 viewDirTS                : TEXCOORD8;
+    DECLARE_LIGHTMAP_OR_SH(staticLightmapUV, vertexSH, 7);
+
+    #ifdef DYNAMICLIGHTMAP_ON
+    float2  dynamicLightmapUV : TEXCOORD8; // Dynamic lightmap UVs
     #endif
 
     float4 positionCS               : SV_POSITION;
@@ -86,27 +100,50 @@ void InitializeInputData(Varyings input, half3 normalTS, out InputData inputData
     inputData.shadowCoord = float4(0, 0, 0, 0);
     #endif
 
-    inputData.fogCoord = input.fogFactorAndVertexLight.x;
+    #ifdef _ADDITIONAL_LIGHTS_VERTEX
+    inputData.fogCoord = InitializeInputDataFog(float4(inputData.positionWS, 1.0), input.fogFactorAndVertexLight.x);
     inputData.vertexLighting = input.fogFactorAndVertexLight.yzw;
-    inputData.bakedGI = SAMPLE_GI(input.lightmapUV, input.vertexSH, inputData.normalWS);
+    #else
+    inputData.fogCoord = InitializeInputDataFog(float4(inputData.positionWS, 1.0), input.fogFactor);
+    inputData.vertexLighting = half3(0, 0, 0);
+    #endif
+
+    #if defined(DYNAMICLIGHTMAP_ON)
+    inputData.bakedGI = SAMPLE_GI(input.staticLightmapUV, input.dynamicLightmapUV, input.vertexSH, inputData.normalWS);
+    #else
+    inputData.bakedGI = SAMPLE_GI(input.staticLightmapUV, input.vertexSH, inputData.normalWS);
+    #endif
+
     inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(input.positionCS);
-    inputData.shadowMask = SAMPLE_SHADOWMASK(input.lightmapUV);
+    inputData.shadowMask = SAMPLE_SHADOWMASK(input.staticLightmapUV);
+
+    #if defined(DEBUG_DISPLAY)
+    #if defined(DYNAMICLIGHTMAP_ON)
+    inputData.dynamicLightmapUV = input.dynamicLightmapUV.xy;
+    #endif
+    #if defined(LIGHTMAP_ON)
+    inputData.staticLightmapUV = input.staticLightmapUV;
+    #else
+    inputData.vertexSH = input.vertexSH;
+    #endif
+    #endif
 }
 
 half4 StylizedPassFragment(Varyings input) : SV_Target
 {
     UNITY_SETUP_INSTANCE_ID(input);
     UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
-    
+
     SurfaceData surfaceData;
     InitializeSimpleLitSurfaceData(input.uv, surfaceData);
 
+    #if defined(LOD_FADE_CROSSFADE) && !VERSION_LOWER(13, 0)
+    LODFadeCrossFade(input.positionCS);
+    #endif
+
     InputData inputData;
     InitializeInputData(input, surfaceData.normalTS, inputData);
-
-#if VERSION_GREATER_EQUAL(12, 0)
     SETUP_DEBUG_TEXTURE_DATA(inputData, input.uv, _BaseMap);
-#endif
 
 #ifdef _DBUFFER
     ApplyDecalToSurfaceData(input.positionCS, surfaceData, inputData);
@@ -143,7 +180,11 @@ half4 StylizedPassFragment(Varyings input) : SV_Target
 
     color.rgb = MixFog(color.rgb, inputData.fogCoord);
 
+    #if UNITY_VERSION >= 202220
+    color.a = OutputAlpha(color.a, IsSurfaceTypeTransparent(_Surface));
+    #else
     color.a = OutputAlpha(color.a, _Surface);
+    #endif
 
     return color;
 }

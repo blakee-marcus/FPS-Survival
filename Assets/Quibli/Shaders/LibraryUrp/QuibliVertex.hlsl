@@ -40,9 +40,14 @@ Varyings LitPassVertex(Attributes input)
     // also required for per-vertex lighting and SH evaluation
     VertexNormalInputs normalInput = GetVertexNormalInputs(input.normalOS, input.tangentOS);
 
+    #if defined(_FOG_FRAGMENT)
+    half fogFactor = 0;
+    #else
+    half fogFactor = ComputeFogFactor(vertexInput.positionCS.z);
+    #endif
+
     half3 viewDirWS = GetWorldSpaceViewDir(vertexInput.positionWS);
     half3 vertexLight = VertexLighting(vertexInput.positionWS, normalInput.normalWS);
-    half fogFactor = ComputeFogFactor(vertexInput.positionCS.z);
 
     output.uv = TRANSFORM_TEX(input.texcoord, _BaseMap);
 
@@ -57,15 +62,23 @@ Varyings LitPassVertex(Attributes input)
     output.tangentWS = tangentWS;
     #endif
 
-    #if defined(REQUIRES_TANGENT_SPACE_VIEW_DIR_INTERPOLATOR)
-    half3 viewDirTS = GetViewDirectionTangentSpace(tangentWS, output.normalWS, viewDirWS);
-    output.viewDirTS = viewDirTS;
+    OUTPUT_LIGHTMAP_UV(input.staticLightmapUV, unity_LightmapST, output.staticLightmapUV);
+    #ifdef DYNAMICLIGHTMAP_ON
+    output.dynamicLightmapUV = input.dynamicLightmapUV.xy * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
     #endif
 
-    OUTPUT_LIGHTMAP_UV(input.lightmapUV, unity_LightmapST, output.lightmapUV);
+    #if UNITY_VERSION >= 202310
+    OUTPUT_SH(vertexInput.positionWS, output.normalWS.xyz, GetWorldSpaceNormalizeViewDir(vertexInput.positionWS), output.vertexSH);
+    #else
     OUTPUT_SH(output.normalWS.xyz, output.vertexSH);
+    #endif
 
+    #ifdef _ADDITIONAL_LIGHTS_VERTEX
+    half3 vertexLight = VertexLighting(vertexInput.positionWS, normalInput.normalWS);
     output.fogFactorAndVertexLight = half4(fogFactor, vertexLight);
+    #else
+    output.fogFactor = fogFactor;
+    #endif
 
     #if defined(REQUIRES_WORLD_SPACE_POS_INTERPOLATOR)
     output.positionWS = vertexInput.positionWS;

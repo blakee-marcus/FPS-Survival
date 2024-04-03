@@ -40,8 +40,6 @@ public class StylizedDetailRenderer : CompoundRenderer {
         public static readonly int CoCParams = Shader.PropertyToID("_CoCParams");
     }
 
-    public override bool visibleInSceneView => false;
-
     public override ScriptableRenderPassInput input =>
         ScriptableRenderPassInput.Color | ScriptableRenderPassInput.Depth;
 
