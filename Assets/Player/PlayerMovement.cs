@@ -9,13 +9,15 @@ public class PlayerMovement : MonoBehaviour
   public CharacterController controller;
   public ParticleSystem dust;
 
+  public PlayerStats stats;
+
 
   // Movement speed
   [Header("Movement Speed")]
   float speed;
-  public float runSpeed = 8f;
-  public float sprintSpeed = 12f;
-  public float crouchSpeed = 4f;
+  //public float runSpeed = 8f;
+  //public float sprintSpeed = 12f;
+  //public float crouchSpeed = 4f;
 
   // Gravity and jump
   [Header("Gravity and Jump")]
@@ -173,7 +175,7 @@ public class PlayerMovement : MonoBehaviour
     controller.height = Mathf.Lerp(controller.height, crouchHeight, 1.5f * Time.deltaTime);
     controller.center = Vector3.Lerp(controller.center, crouchingCenter, 1.5f * Time.deltaTime);
     transform.localScale = new Vector3(transform.localScale.x, crouchHeight, transform.localScale.z);
-    if (speed > runSpeed)
+    if (speed > stats.runSpeed)
     {
       isSprinting = false;
       isSliding = true;
@@ -208,7 +210,7 @@ public class PlayerMovement : MonoBehaviour
 
   void SpeedHandler()
   {
-    speed = isCrouching ? crouchSpeed : isSprinting ? sprintSpeed : runSpeed;
+    speed = isCrouching ? stats.crouchSpeed : isSprinting ? stats.sprintSpeed : stats.runSpeed;
   }
 
   void CreateDust()

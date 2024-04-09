@@ -713,11 +713,11 @@ PlayerSettings:
     m_VersionName: 
   apiCompatibilityLevel: 6
   activeInputHandler: 0
-  cloudProjectId: 
+  cloudProjectId: d47b077a-c09c-4503-8735-4d1f9b6911e5
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: 
-  organizationId: 
+  projectName: Project
+  organizationId: rektcookie
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   playerDataPath: 
