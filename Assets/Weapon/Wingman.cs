@@ -4,121 +4,110 @@ using TMPro;
 
 public class Wingman : MonoBehaviour
 {
-    public int damage = 45;
-    public float fireRate = 2.6f;
-    private float nextTimeToFire = 0f;
+  [Header("References")]
+  public PlayerStats stats;
 
-    public int maxAmmo = 6;
-    private int currentAmmo;
-    public float reloadTime = 2.1f;
+  private float nextTimeToFire = 0f;
+  private int currentAmmo;
+  private bool isReloading = false;
 
-    public float headshotMultiplier = 2.15f;
-    public float limbMultiplier = 0.9f;
+  public Camera fpsCam;
+  public TextMeshProUGUI currentAmmoText;
+  public TextMeshProUGUI maxAmmoText;
+  [SerializeField] ParticleSystem muzzleFlash;
 
-    private bool isReloading = false;
+  private void Start()
+  {
+    currentAmmo = stats.weaponMaxAmmo;
+    UpdateAmmoUI();
+  }
 
-    public Camera fpsCam;
-    public TextMeshProUGUI currentAmmoText;
-    public TextMeshProUGUI maxAmmoText;
+  private void OnEnable()
+  {
+    isReloading = false;
+  }
 
-    [SerializeField] ParticleSystem muzzleFlash;
+  private void Update()
+  {
+    HandleInput();
+  }
 
-    private void Start()
+  private void HandleInput()
+  {
+    if (isReloading) { return; }
+
+    if (currentAmmo <= 0)
     {
-        currentAmmo = maxAmmo;
-        UpdateAmmoUI();
+      StartCoroutine(Reload());
     }
 
-    private void OnEnable()
+    if (Input.GetKeyDown(KeyCode.R))
     {
-        isReloading = false;
+      StartCoroutine(Reload());
     }
 
-    private void Update()
+    if (Input.GetButtonDown("Fire1") && Time.time >= nextTimeToFire)
     {
-        HandleInput();
-        UpdateAmmoUI();
+      nextTimeToFire = Time.time + (1f / stats.weaponFireRate);
+      Shoot();
     }
+  }
 
-    private void HandleInput()
+  private IEnumerator Reload()
+  {
+    isReloading = true;
+    yield return new WaitForSeconds(stats.weaponReloadTime);
+    currentAmmo = stats.weaponMaxAmmo;
+    isReloading = false;
+    Debug.Log("Reloaded");
+    UpdateAmmoUI();
+  }
+
+  private void Shoot()
+  {
+    muzzleFlash.Play();
+    currentAmmo--;
+    UpdateAmmoUI();
+    RaycastHit hit;
+
+    Debug.Log("Shooting");
+    Debug.Log(currentAmmo);
+
+    if (Physics.Raycast(fpsCam.transform.position, fpsCam.transform.forward, out hit))
     {
-        if (isReloading) { return; }
+      Enemy enemy = hit.transform.GetComponent<Enemy>();
 
-        if (currentAmmo <= 0)
+      if (enemy == null)
+      {
+        enemy = hit.transform.GetComponentInParent<Enemy>();
+      }
+
+      if (enemy != null)
+      {
+        if (hit.collider.CompareTag("Head"))
         {
-            StartCoroutine(Reload());
-            return;
+          int headshotDamage = Mathf.RoundToInt(stats.weaponDamage * stats.headshotMultiplier);
+          DamagePopup.Create(hit.point, headshotDamage, true);
+          enemy.TakeDamage(headshotDamage);
         }
-
-        if (Input.GetButtonDown("Fire1") && Time.time >= nextTimeToFire)
+        else if (hit.collider.CompareTag("Limb"))
         {
-            nextTimeToFire = Time.time + 1f / fireRate;
-            Shoot();
+          int limbDamage = Mathf.RoundToInt(stats.weaponDamage * stats.limbMultiplier);
+          DamagePopup.Create(hit.point, limbDamage, false);
+          enemy.TakeDamage(limbDamage);
         }
-
-        if (Input.GetKeyDown(KeyCode.R))
+        else
         {
-            StartCoroutine(Reload());
+          DamagePopup.Create(hit.point, stats.weaponDamage, false);
+          enemy.TakeDamage(stats.weaponDamage);
         }
+      }
     }
+  }
 
-    private void UpdateAmmoUI()
-    {
-        if (currentAmmo != int.Parse(currentAmmoText.text))
-        {
-            currentAmmoText.text = currentAmmo.ToString("D2");
-        }
-
-        if (maxAmmo != int.Parse(maxAmmoText.text))
-        {
-            maxAmmoText.text = maxAmmo.ToString("D3");
-        }
-    }
-
-    private IEnumerator Reload()
-    {
-        isReloading = true;
-        Debug.Log("Reloading...");
-        yield return new WaitForSeconds(reloadTime);
-        currentAmmo = maxAmmo;
-        isReloading = false;
-    }
-
-    private void Shoot()
-    {
-        muzzleFlash.Play();
-        RaycastHit hit;
-
-        currentAmmo--;
-
-        if (Physics.Raycast(fpsCam.transform.position, fpsCam.transform.forward, out hit))
-        {
-            Enemy enemy = hit.transform.GetComponent<Enemy>();
-            if (enemy == null) 
-            { 
-                enemy = hit.transform.GetComponentInParent<Enemy>();
-            }
-            
-            if (enemy != null)
-            {
-                if (hit.collider.CompareTag("Head"))
-                {
-                    int headshotDamage = Mathf.RoundToInt(damage * headshotMultiplier);
-                    DamagePopup.Create(hit.point, headshotDamage, true);
-                    enemy.TakeDamage(headshotDamage);
-                }
-                else if (hit.collider.CompareTag("Limb"))
-                {
-                    int limbDamage = Mathf.RoundToInt(damage * limbMultiplier);
-                    DamagePopup.Create(hit.point, limbDamage, false);
-                    enemy.TakeDamage(limbDamage);
-                }
-                else
-                {
-                    DamagePopup.Create(hit.point, damage, false);
-                    enemy.TakeDamage(damage);
-                }
-            }
-        }
-    }
+  private void UpdateAmmoUI()
+  {
+    currentAmmoText.text = currentAmmo.ToString("D3");
+    maxAmmoText.text = stats.weaponMaxAmmo.ToString("D3");
+  }
 }

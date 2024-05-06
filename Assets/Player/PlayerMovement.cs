@@ -8,17 +8,13 @@ public class PlayerMovement : MonoBehaviour
   [Header("References")]
   public CharacterController controller;
   public ParticleSystem dust;
-
   public PlayerStats stats;
 
 
   // Movement speed
   [Header("Movement Speed")]
   float speed;
-  //public float runSpeed = 8f;
-  //public float sprintSpeed = 12f;
-  //public float crouchSpeed = 4f;
-
+  
   // Gravity and jump
   [Header("Gravity and Jump")]
   public float gravity = -19.62f;

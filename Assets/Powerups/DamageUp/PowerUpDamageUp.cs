@@ -24,11 +24,11 @@ public class PowerUpDamageUp : MonoBehaviour
         GetComponent<MeshRenderer>().enabled = false;
         GetComponent<Collider>().enabled = false;
 
-        player.gameObject.transform.Find("Camera/WeaponHolder").GetChild(0).GetComponent<Wingman>().damage *= 10;
+        player.gameObject.transform.GetComponent<PlayerStats>().weaponDamage *= 10;
 
         yield return new WaitForSeconds(duration);
 
-        player.gameObject.transform.Find("Camera/WeaponHolder").GetChild(0).GetComponent<Wingman>().damage /= 10;
+        player.gameObject.transform.GetComponent<PlayerStats>().weaponDamage /= 10;
         
         Destroy(instantiatedEffect);
         Destroy(gameObject);

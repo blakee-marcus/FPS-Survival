@@ -11,7 +11,7 @@ public class Enemy : MonoBehaviour
   public float gravity = -19.62f;
   bool isGrounded;
 
-  public int maxHealth;
+  public float maxHealth;
   public int attackDamage = 10;
   public float attackRange = 3f;
   public float moveSpeed = 1.85f;
@@ -74,7 +74,7 @@ public class Enemy : MonoBehaviour
   public void TakeDamage(float damage)
   {
     currentHealth -= damage;
-    if (currentHealth <= 0)
+    if (currentHealth <= 0f)
     {
       DropHandler();
       Die();
